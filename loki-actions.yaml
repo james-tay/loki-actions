@@ -1,7 +1,7 @@
 lokiURL: http://app-loki.drowningfrog.homenet.org:3100
+preAction: /tools/loki-actions/actions.sh pre
+postAction: /tools/loki-actions/actions.sh post
 period: 600
-preAction: rm -f /tmp/events
-postAction: ls -l /tmp/events
 jobs:
 
   - name: vtund roadwarrior
