@@ -1,0 +1,34 @@
+lokiURL: http://app-loki.drowningfrog.homenet.org:3100
+period: 600
+preAction: rm -f /tmp/events
+postAction: ls -l /tmp/events
+jobs:
+
+  - name: vtund roadwarrior
+    query: "{job=\"syslog_messages\"} |= \"vtund\" |= \"Session roadwarrior\""
+    action: "cat >>/tmp/events"
+
+  - name: firehose/firebox logins
+    query: "{job=\"syslog_messages\"} |~ \"fire(box|hose)\" |= \"Accepted\""
+    action: "cat >>/tmp/events"
+
+  - name: IO errors
+    query: "{job=\"syslog_messages\"} |~ \"I/O error\""
+    action: "cat >>/tmp/events"
+
+  - name: kernel stacktrace
+    query: "{job=\"syslog_messages\"} |~ \"kernel: Call Trace\""
+    action: "cat >>/tmp/events"
+
+  - name: nybox/sfbox logins
+    query: "{job=\"syslog_messages\"} |~ \"(nybox|sfbox)\" |= \"Accepted\""
+    action: "cat >>/tmp/events"
+
+  - name: zpool event
+    query: "{job=\"syslog_messages\"} |~ \"vdev state changed\""
+    action: "cat >>/tmp/events"
+
+  - name: new SSL certificate
+    query: "{job=\"syslog_messages\"} |~ \"New certificate\""
+    action: "cat >>/tmp/events"
+
