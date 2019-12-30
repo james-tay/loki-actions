@@ -21,7 +21,7 @@ jobs:
     action: "cat >>/tmp/events"
 
   - name: nybox/sfbox logins
-    query: "{job=\"syslog_messages\"} |~ \"(nybox|sfbox)\" |= \"Accepted\""
+    query: "{job=\"syslog_messages\"} |~ \"(nybox|sfbox)\" |= \"Accepted\" != \"SHA256:e752M1pjHLvVc\""
     action: "cat >>/tmp/events"
 
   - name: zpool event
