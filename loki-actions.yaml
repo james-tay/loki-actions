@@ -1,3 +1,10 @@
+# This file is typically maintained with the following procedure:
+#
+#  1. edit this file 
+#  2. git commit and git push to repo
+#  3. in the "app-loki" pod, exec a shell in the "app-loki-tools" container
+#  4. run "/tools/etc/update.sh"
+
 lokiURL: http://app-loki.drowningfrog.homenet.org:3100
 preAction: /tools/loki-actions/actions.sh pre
 postAction: /tools/loki-actions/actions.sh post
