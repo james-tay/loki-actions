@@ -4,8 +4,8 @@ postAction: /tools/loki-actions/actions.sh post
 period: 600
 jobs:
 
-  - name: vtund roadwarrior
-    query: "{job=\"syslog_messages\"} |= \"vtund\" |= \"Session roadwarrior\""
+  - name: vtund sessions
+    query: "{job=\"messages\"} |= \"vtund\" |= \"Session\""
     action: "cat >>/tmp/events"
 
   - name: firehose/firebox logins

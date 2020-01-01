@@ -147,6 +147,9 @@ func main () {
 
     url := fmt.Sprintf ("%s/%s?%s",
              cfg.LokiURL, G_LokiQueryUri, params.Encode())
+    if (G_Debug > 0) {
+      fmt.Printf ("DEBUG: url - %s\n", url)
+    }
     resp, err := http.Get (url)
     if (err != nil) {
       fmt.Printf ("FATAL! '%s' failed - %s\n", url, err)
