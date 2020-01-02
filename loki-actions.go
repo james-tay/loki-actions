@@ -4,6 +4,12 @@
      % go get gopkg.in/yaml.v2
      % go build loki-actions.go
 
+   Usage
+
+     This tool expects to be called from cron, for example :
+
+      0 * * * * /path/to/loki-actions /path/to/config.yaml
+
    Sample YAML configuration:
 
      lokiURL: http://loki.example.com:3100
@@ -28,7 +34,9 @@
      loki query jobs are executed.
 
      The timestamp of the current run is written to "lastRun". Subsequent
-     runs will use the time written in "lastRun" as the start time.
+     runs will use the time written in "lastRun" as the start time. Since
+     we can't assume cron runs us precisely on time, using "lastRun" to
+     determine start time ensures we don't miss events in loki.
 
      Commands declared in "action" are executed using "bash -c", or whatever
      the SHELL environment variable is set to.
@@ -39,6 +47,7 @@ package main
 import (
   "os"
   "fmt"
+  "bytes"
   "time"
   "strings"
   "strconv"
@@ -136,6 +145,20 @@ func main () {
     fmt.Printf ("DEBUG: cfg - %#v\n", cfg)
   }
 
+  /* if "LastRun" was defined, attempt to read it and determine out "start" */
+
+  now := time.Now().Unix()
+  start := now - cfg.Period
+  if (len(cfg.LastRun) > 0) {
+    content, err := ioutil.ReadFile (cfg.LastRun)
+    if (err != nil) {
+      fmt.Printf ("WARNING: Cannot read %s, ignoring - %s\n", cfg.LastRun, err)
+    } else {
+      start,_ = strconv.ParseInt (string(bytes.Trim(content,"\n")), 10, 64)
+      fmt.Printf ("NOTICE: lastRun %d secs ago.\n", now - start)
+    }
+  }
+
   /* if a preAction was defined, execute it now */
 
   if (len(cfg.PreAction) > 0) {
@@ -147,13 +170,10 @@ func main () {
      queries use a standard start time.
   */
 
-  now := time.Now().Unix()
-  start := now - cfg.Period
   for _, element := range (cfg.Jobs) {
-
     params := url.Values{}
     params.Add("query", element.Query)
-    params.Add("start", fmt.Sprintf("%d000000000", start))
+    params.Add("start", fmt.Sprintf("%d000000000", start)) /* nanoseconds */
 
     url := fmt.Sprintf ("%s/%s?%s",
              cfg.LokiURL, G_LokiQueryUri, params.Encode())
