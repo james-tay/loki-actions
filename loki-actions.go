@@ -7,6 +7,7 @@
    Sample YAML configuration:
 
      lokiURL: http://loki.example.com:3100
+     lastRun: /path/to/lastrun # write timestamp of our last run here
      period: 600 # number of seconds to look into the past
      preAction: /path/to/pre-script.sh # run this before performing jobs
      postAction: /path/to/post-script.sh # run this after all jobs complete
@@ -25,6 +26,12 @@
      buffer and delivered into the configured action's standard input. If
      pre/post scripts are configured, then they are run before/after the
      loki query jobs are executed.
+
+     The timestamp of the current run is written to "lastRun". Subsequent
+     runs will use the time written in "lastRun" as the start time.
+
+     Commands declared in "action" are executed using "bash -c", or whatever
+     the SHELL environment variable is set to.
 */
 
 package main 
@@ -45,7 +52,7 @@ import (
 )
 
 /*
-   The following data structures must match the YAML we'll be parsing.
+   The following data structures determine the YAML we'll be parsing.
    Note:
      - field names MUST start with an uppercase character (why????). 
      - annotations will be used by the yaml library during parsing.
@@ -59,11 +66,14 @@ type S_Job struct {
 
 type S_Config struct {
   LokiURL string `yaml:"lokiURL"`
+  LastRun string `yaml:"lastRun"`
   Period int64 `yaml:"period"`
   PreAction string `yaml:"preAction"`
   PostAction string `yaml:"postAction"`
   Jobs []S_Job `yaml:"jobs"`
 }
+
+/* Global variables here */
 
 const G_LokiQueryUri = "loki/api/v1/query_range"
 var G_Shell string
@@ -71,9 +81,9 @@ var G_Debug int
 
 /* ------------------------------------------------------------------------- */
 
-func f_exec (action string, events string) {
+func f_exec (action string, buf string) {
   cmd := exec.Command (G_Shell, "-c", action)
-  cmd.Stdin = strings.NewReader (events)
+  cmd.Stdin = strings.NewReader (buf)
   out, err := cmd.CombinedOutput()
   if (err != nil) {
     fmt.Printf ("WARNING: '%s' - %s\n", action, err)
@@ -222,7 +232,9 @@ func main () {
 
       if (len(events) > 0) {
         fmt.Printf ("NOTICE: events found for '%s'.\n", element.Query)
-        f_exec (element.Action, events)
+        if (len(element.Action) > 0) {
+          f_exec (element.Action, events)
+        }
       } else {
         fmt.Printf ("NOTICE: no results for '%s'.\n", element.Query)
       }
@@ -234,6 +246,18 @@ func main () {
 
   if (len(cfg.PostAction) > 0) {
     f_exec (cfg.PostAction, "")
+  }
+
+  /* if "LastRun" was configured, save "now" in there. */
+
+  if (len(cfg.LastRun) > 0) {
+    s := fmt.Sprintf ("%d\n", now)
+    err = ioutil.WriteFile (cfg.LastRun, []byte(s), 0644)
+    if (err != nil) {
+      fmt.Printf ("WARNING: Could not write to '%s' - %s\n", cfg.LastRun, err)
+    } else {
+      fmt.Printf ("NOTICE: timestamp written to %s.\n", cfg.LastRun)
+    }
   }
 
 } /* ... main() */

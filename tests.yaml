@@ -1,0 +1,21 @@
+# This file is used for testing loki-actions.
+
+lokiURL: http://app-loki.drowningfrog.homenet.org:3100
+preAction: rm -f /tmp/events
+postAction: /bin/true
+period: 600
+lastRun: /tmp/loki-actions.lastrun
+jobs:
+
+  - name: vtund sessions
+    query: "{job=\"messages\"} |= \"vtund\" |= \"Session\""
+    action: "cat >>/tmp/events"
+
+  - name: zpool event
+    query: "{job=\"syslog_messages\"} |~ \"vdev state changed\""
+    action: "cat >>/tmp/events"
+
+  - name: new SSL certificate
+    query: "{job=\"syslog_messages\"} |~ \"New certificate\""
+    action: "cat >>/tmp/events"
+
