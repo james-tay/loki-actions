@@ -21,7 +21,7 @@ jobs:
     action: "cat >>/tmp/events"
 
   - name: IO errors
-    query: "{job=\"syslog_messages\"} |~ \"I/O error\""
+    query: "{job=\"syslog_messages\"} |~ \"I/O error\" != \"Dad-iMac\""
     action: "cat >>/tmp/events"
 
   - name: kernel stacktrace
@@ -38,5 +38,9 @@ jobs:
 
   - name: new SSL certificate
     query: "{job=\"syslog_messages\"} |~ \"New certificate\""
+    action: "cat >>/tmp/events"
+
+  - name: minecraft connection attempts
+    query: "{job=\"syslog_messages\"} |= \"firebox kernel:\" |= \"minecraft\" |= \"SYN\""
     action: "cat >>/tmp/events"
 
