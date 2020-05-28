@@ -44,3 +44,7 @@ jobs:
     query: "{job=\"syslog_messages\"} |= \"firebox kernel:\" |= \"minecraft\" |= \"SYN\""
     action: "cat >>/tmp/events"
 
+  - name: No DHCP offers
+    query: "{job=\"syslog_messages\"} |= \"No DHCPOFFERS\""
+    action: "cat >>/tmp/events"
+
