@@ -48,3 +48,7 @@ jobs:
     query: "{job=\"syslog_messages\"} |= \"No DHCPOFFERS\""
     action: "cat >>/tmp/events"
 
+  - name: ext4 errors
+    query: "{job=\"syslog_messages\"} |= \"EXT4-fs\" |= \"error\""
+    action: "cat >>/tmp/events"
+
