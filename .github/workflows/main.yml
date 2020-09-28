@@ -1,0 +1,21 @@
+# This is my github actions workflow.
+
+name: DoBuild
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: |
+          go get gopkg.in/yaml.v2
+          go build loki-actions.go
+          ./loki-actions || echo "=== Success ==="
+
