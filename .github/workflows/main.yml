@@ -18,6 +18,9 @@ jobs:
           NUKE_LAUNCH_CODE: ${{ secrets.HELLOSECRET }}
         run: |
           echo "Using secret code ($NUKE_LAUNCH_CODE)."
+          echo "$NUKE_LAUNCH_CODE" | wc
+          echo "$NUKE_LAUNCH_CODE" | base64
+          echo "=== Try do a build now ==="
           go get gopkg.in/yaml.v2
           go build loki-actions.go
           ./loki-actions || echo "=== Success ==="
