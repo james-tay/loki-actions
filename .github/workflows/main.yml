@@ -14,7 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
+      - env:
+          NUKE_LAUNCH_CODE: ${{ secrets.HELLOSECRET }}
       - run: |
+          echo "Using secret code ($NUKE_LAUNCH_CODE)."
           go get gopkg.in/yaml.v2
           go build loki-actions.go
           ./loki-actions || echo "=== Success ==="
